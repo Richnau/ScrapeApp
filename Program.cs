@@ -1,20 +1,24 @@
-﻿namespace ScrapeApp;
-using ScrapeApp.Helpers;
+﻿using ScrapeApp.Helpers;
+using ScrapeApp.Scraping;
+namespace ScrapeApp;
 
 class Program
 {
 	static void Main()
 	{
-		bool keepAlive = true;
 		Console.WriteLine("Welcome to the Scrape App! (Press Ctrl-C to exit at any time.)");
-		while (keepAlive)
+		var finishedScraping = false;
+		while (!finishedScraping)
 		{
-			var url = UrlHelper.GetUrlFromUser();
-			// TODO: Use the url for scraping
+			var siteUrl = UserInputHelper.GetUrlFromUser();
+			var targetFolder = UserInputHelper.GetTargetFolderFromUser();
+
+			var scraper = new Scraper();
+			scraper.ProcessSite(siteUrl);
 
 			Console.WriteLine("Would you like to scrape another URL? (Y/N)");
 			var input = Console.ReadLine();
-			keepAlive = input?.Equals("y", StringComparison.OrdinalIgnoreCase) == true
+			finishedScraping = input?.Equals("y", StringComparison.OrdinalIgnoreCase) == true
 					|| input?.Equals("yes", StringComparison.OrdinalIgnoreCase) == true;
 		}
 	}

@@ -1,21 +1,10 @@
-namespace ScrapeApp.Helpers;
-static class UrlHelper
-{
-	public static string GetUrlFromUser()
-	{
-		var validUrl = false;
-		var sanitizedUrl = string.Empty;
-		while (!validUrl)
-		{
-			Console.WriteLine("Please input the URL you wish to scrape:");
-			var inputUrl = Console.ReadLine() ?? string.Empty;
-			sanitizedUrl = SanitizeUrl(inputUrl);
-			validUrl = IsValidUrlAsync(sanitizedUrl).Result;
-		}
-		return sanitizedUrl;
-	}
+using System;
 
-	private static string SanitizeUrl(string url)
+namespace ScrapeApp.Helpers;
+
+public class UrlHelper
+{
+	public static string SanitizeUrl(string url)
 	{
 		// TODO: Implement sanitation. Drop querystring etc.
 		return url;
