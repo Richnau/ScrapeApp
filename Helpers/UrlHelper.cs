@@ -1,5 +1,3 @@
-using System;
-
 namespace ScrapeApp.Helpers;
 
 public class UrlHelper
