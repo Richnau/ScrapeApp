@@ -14,12 +14,14 @@ class Program
 			var targetFolder = UserInputHelper.GetTargetFolderFromUser();
 
 			var scraper = new Scraper();
-			scraper.ProcessSite(siteUrl);
+			scraper.ProcessSite(siteUrl, targetFolder);
 
 			Console.WriteLine("Would you like to scrape another URL? (Y/N)");
 			var input = Console.ReadLine();
 			finishedScraping = input?.Equals("y", StringComparison.OrdinalIgnoreCase) == true
 					|| input?.Equals("yes", StringComparison.OrdinalIgnoreCase) == true;
 		}
+		Console.WriteLine("Thank you for using the Scrape App!");
+		Console.ReadKey();
 	}
 }
