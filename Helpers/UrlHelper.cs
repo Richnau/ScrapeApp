@@ -4,8 +4,13 @@ public class UrlHelper
 {
 	public static string SanitizeUrl(string url)
 	{
-		// TODO: Implement sanitation. Drop querystring etc.
-		return url;
+		if (!url.StartsWith("http://") && !url.StartsWith("https://"))
+		{
+			url = "https://" + url;
+		}
+		var uri = new Uri(url);
+		var sanitizedUrl = uri.GetLeftPart(UriPartial.Path);
+		return sanitizedUrl;
 	}
 
 	public static async Task<bool> IsValidUrlAsync(string url)
