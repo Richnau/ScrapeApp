@@ -1,4 +1,3 @@
-
 namespace ScrapeApp.Helpers;
 static class UserInputHelper
 {
@@ -18,11 +17,18 @@ static class UserInputHelper
 
 	public static string GetTargetFolderFromUser()
 	{
-		Console.WriteLine("Please input the target folder where you want to save the scraped data:");
-		var targetFolder = Console.ReadLine() ?? string.Empty;
+		try
+		{
+			Console.WriteLine("Please input the target folder where you want to save the scraped data:");
+			var targetFolder = Console.ReadLine() ?? string.Empty;
+			Directory.CreateDirectory(targetFolder);
+			return targetFolder;
+		}
+		catch (Exception e)
+		{
+			Console.WriteLine($"Error creating folder: {e.Message}");
+			return string.Empty;
+		}
 
-		//TODO: Validate folder path?
-		Directory.CreateDirectory(targetFolder);
-		return targetFolder;
 	}
 }
