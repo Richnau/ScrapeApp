@@ -2,15 +2,15 @@ namespace ScrapeApp.Helpers;
 
 public class UrlHelper
 {
-	public static string SanitizeUrl(string url)
+	public static string GetPath(string url)
 	{
 		if (!url.StartsWith("http://") && !url.StartsWith("https://"))
 		{
 			url = "https://" + url;
 		}
 		var uri = new Uri(url);
-		var sanitizedUrl = uri.GetLeftPart(UriPartial.Path);
-		return sanitizedUrl;
+		var urlPath = uri.GetLeftPart(UriPartial.Path);
+		return urlPath;
 	}
 
 	public static async Task<bool> IsValidUrlAsync(string url)

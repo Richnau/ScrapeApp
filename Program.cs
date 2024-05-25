@@ -13,8 +13,8 @@ class Program
 			var siteUrl = UserInputHelper.GetUrlFromUser();
 			var targetFolder = UserInputHelper.GetTargetFolderFromUser();
 
-			var scraper = new Scraper();
-			scraper.ProcessSite(siteUrl, targetFolder);
+			var scraper = new Scraper(siteUrl);
+			scraper.ProcessSite(targetFolder);
 
 			Console.WriteLine("Would you like to scrape another URL? (Y/N)");
 			var input = Console.ReadLine();

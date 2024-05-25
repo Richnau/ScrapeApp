@@ -4,15 +4,15 @@ static class UserInputHelper
 	public static string GetUrlFromUser()
 	{
 		var validUrl = false;
-		var sanitizedUrl = string.Empty;
+		var urlPath = string.Empty;
 		while (!validUrl)
 		{
 			Console.WriteLine("Please input the URL you wish to scrape:");
 			var inputUrl = Console.ReadLine() ?? string.Empty;
-			sanitizedUrl = UrlHelper.SanitizeUrl(inputUrl);
-			validUrl = UrlHelper.IsValidUrlAsync(sanitizedUrl).Result;
+			urlPath = UrlHelper.GetPath(inputUrl);
+			validUrl = UrlHelper.IsValidUrlAsync(urlPath)?.Result ?? false;
 		}
-		return sanitizedUrl;
+		return urlPath;
 	}
 
 	public static string GetTargetFolderFromUser()
@@ -21,7 +21,10 @@ static class UserInputHelper
 		{
 			Console.WriteLine("Please input the target folder where you want to save the scraped data:");
 			var targetFolder = Console.ReadLine() ?? string.Empty;
-			Directory.CreateDirectory(targetFolder);
+			if (!string.IsNullOrEmpty(targetFolder))
+			{
+				Directory.CreateDirectory(targetFolder);
+			}
 			return targetFolder;
 		}
 		catch (Exception e)
