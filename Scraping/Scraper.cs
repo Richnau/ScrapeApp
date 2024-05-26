@@ -81,23 +81,32 @@ public class Scraper(string startingUrl, string targetFolder)
 
 		if (links != null)
 		{
-			foreach (var link in links) //TODO: multithread this?
+			var downloadTasks = links.Select(link =>
 			{
 				string linkUrl = link.GetAttributeValue("src", link.GetAttributeValue("href", ""));
-				var linkUri = new Uri(pageUri, linkUrl);
-				var filePath = Path.Combine([TargetFolder, .. linkUri.AbsolutePath.Split('/')]);
+				var fileUri = new Uri(pageUri, linkUrl);
+				var filePath = Path.Combine([TargetFolder, .. fileUri.AbsolutePath.Split('/')]);
 
 				if (DownloadableFiles.TryAdd(filePath, false))
 				{
-					Directory.CreateDirectory(Path.GetDirectoryName(filePath));
-					using var httpClient = new HttpClient();
-					var fileBytes = httpClient.GetByteArrayAsync(linkUri).Result;
-					File.WriteAllBytes(filePath, fileBytes);
-					DownloadableFiles[filePath] = true;
-					UpdateProgress();
+					return DownloadFileAsync(fileUri.AbsoluteUri, filePath);
 				}
-			}
+				else
+				{
+					return null;
+				}
+			}).ToArray();
 		}
+	}
+
+	private async Task DownloadFileAsync(string fileUrl, string filePath)
+	{
+		Directory.CreateDirectory(Path.GetDirectoryName(filePath));
+		using var httpClient = new HttpClient();
+		var fileBytes = await httpClient.GetByteArrayAsync(fileUrl);
+		File.WriteAllBytes(filePath, fileBytes);
+		DownloadableFiles[filePath] = true;
+		UpdateProgress();
 	}
 
 	private void ExtractLinks(string pageUrl, HtmlDocument document)
@@ -151,7 +160,7 @@ public class Scraper(string startingUrl, string targetFolder)
 	{
 		string hoursText = elapsedTime.Hours > 0 ? $"{elapsedTime.Hours} hours " : string.Empty;
 		string minutesText = elapsedTime.Minutes > 0 ? $"{elapsedTime.Minutes} minutes" : string.Empty;
-		string secondsText = $"{elapsedTime.Seconds} seconds.";
+		string secondsText = $"{elapsedTime.Seconds} seconds";
 
 		string timeText = string.Join(" ", hoursText, minutesText, secondsText).Trim();
 
