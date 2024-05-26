@@ -1,6 +1,7 @@
 using HtmlAgilityPack;
 using ScrapeApp.Extensions;
 using System.Collections.Concurrent;
+using System.Diagnostics;
 namespace ScrapeApp.Scraping;
 
 public class Scraper(string startingUrl, string targetFolder)
@@ -13,12 +14,13 @@ public class Scraper(string startingUrl, string targetFolder)
 
 	public void ProcessSite()
 	{
+		Stopwatch stopWatch = new();
+		stopWatch.Start();
 		ScrapablePages.Clear();
 		ScrapeSite();
-		foreach (var page in ScrapablePages)
-		{
-			Console.WriteLine($"Scraped page: {page.Key}");
-		}
+
+		stopWatch.Stop();
+		Console.WriteLine($"Scraped {ScrapablePages.Count} pages in {stopWatch.Elapsed.TotalSeconds} seconds.");
 	}
 
 	private void ScrapeSite()
@@ -31,6 +33,9 @@ public class Scraper(string startingUrl, string targetFolder)
 				.Select(p => ScrapePageAsync(p.Key)).ToList();
 
 			Task.WhenAll(scrapeTasks).Wait(); //TODO: add minimum wait time to avoid request spamming?
+
+			Console.SetCursorPosition(0, Console.CursorTop);
+			Console.Write($"Scraped {ScrapablePages.Count(p => p.Value)} of {ScrapablePages.Count} pages.");
 		}
 	}
 
@@ -73,13 +78,14 @@ public class Scraper(string startingUrl, string targetFolder)
 
 		if (links != null)
 		{
-			foreach (var link in links)
+			foreach (var link in links) //TODO: multithread this?
 			{
 				string linkUrl = link.GetAttributeValue("src", link.GetAttributeValue("href", ""));
 				var linkUri = new Uri(pageUri, linkUrl);
 				var filePath = Path.Combine([TargetFolder, .. linkUri.AbsolutePath.Split('/')]);
 
-				if (DownloadableFiles.TryAdd(filePath, false)){
+				if (DownloadableFiles.TryAdd(filePath, false))
+				{
 					Directory.CreateDirectory(Path.GetDirectoryName(filePath));
 					using var httpClient = new HttpClient();
 					var fileBytes = httpClient.GetByteArrayAsync(linkUri).Result;
