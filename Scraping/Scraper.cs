@@ -1,13 +1,14 @@
 using HtmlAgilityPack;
 using ScrapeApp.Extensions;
 using ScrapeApp.Models;
+using System.Collections.Concurrent;
 namespace ScrapeApp.Scraping;
 
 public class Scraper(string startingUrl, string targetFolder)
 {
-	public List<ScrapablePage> ScrapablePages { get; set; } = [];
-	public string StartingUrl { get; set; } = startingUrl;
-	public string TargetFolder { get; set; } = targetFolder;
+	private ConcurrentBag<ScrapablePage> ScrapablePages { get; set; } = [];
+	private string StartingUrl { get; set; } = startingUrl;
+	private string TargetFolder { get; set; } = targetFolder;
 
 	public void ProcessSite()
 	{
@@ -25,7 +26,7 @@ public class Scraper(string startingUrl, string targetFolder)
 
 		while (ScrapablePages.Any(x => !x.Scraped))
 		{
-			var scrapeTasks = ScrapablePages.Where(p => !p.Scraped).Take(1) //TODO: configurable batch size
+			var scrapeTasks = ScrapablePages.Where(p => !p.Scraped).Take(5) //TODO: configurable batch size
 				.Select(ScrapePageAsync).ToList();
 
 			Task.WhenAll(scrapeTasks).Wait(); //TODO: add minimum wait time to avoid request spamming?
