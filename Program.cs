@@ -10,11 +10,11 @@ class Program
 		var finishedScraping = false;
 		while (!finishedScraping)
 		{
-			var siteUrl = UserInputHelper.GetUrlFromUser();
-			var targetFolder = UserInputHelper.GetTargetFolderFromUser();
+			var siteUrl = UserInputHelper.GetUrl();
+			var targetFolder = UserInputHelper.GetOrCreateTargetFolder();
 
-			var scraper = new Scraper(siteUrl);
-			scraper.ProcessSite(targetFolder);
+			var scraper = new Scraper(siteUrl, targetFolder);
+			scraper.ProcessSite();
 
 			Console.WriteLine("Would you like to scrape another URL? (Y/N)");
 			var input = Console.ReadLine();

@@ -1,7 +1,7 @@
 namespace ScrapeApp.Helpers;
 static class UserInputHelper
 {
-	public static string GetUrlFromUser()
+	public static string GetUrl()
 	{
 		var validUrl = false;
 		var urlPath = string.Empty;
@@ -15,15 +15,17 @@ static class UserInputHelper
 		return urlPath;
 	}
 
-	public static string GetTargetFolderFromUser()
+	public static string GetOrCreateTargetFolder()
 	{
 		try
 		{
-			Console.WriteLine("Please input the target folder where you want to save the scraped data:");
-			var targetFolder = Console.ReadLine() ?? string.Empty;
-			if (!string.IsNullOrEmpty(targetFolder))
+			var targetFolder = string.Empty;
+			DirectoryInfo directoryInfo = null;
+			while (directoryInfo == null)
 			{
-				Directory.CreateDirectory(targetFolder);
+				Console.WriteLine("Please input the target folder where you want to save the scraped data:");
+				targetFolder = Console.ReadLine().TrimEnd('\\');
+				directoryInfo = Directory.CreateDirectory(targetFolder);
 			}
 			return targetFolder;
 		}
