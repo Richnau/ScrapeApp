@@ -7,20 +7,25 @@ namespace ScrapeApp.Scraping;
 public class Scraper(string startingUrl, string targetFolder)
 {
 	private ConcurrentDictionary<string, bool> DownloadableFiles { get; set; } = [];
-
 	private ConcurrentDictionary<string, bool> ScrapablePages { get; set; } = [];
 	private string StartingUrl { get; set; } = startingUrl;
 	private string TargetFolder { get; set; } = targetFolder;
+	private readonly object progressUpdateLock = new();
 
 	public void ProcessSite()
 	{
+		Console.WriteLine();
+		Console.WriteLine($"Scraping site: '{StartingUrl}' to folder: '{TargetFolder}'");
 		Stopwatch stopWatch = new();
 		stopWatch.Start();
 		ScrapablePages.Clear();
+		DownloadableFiles.Clear();
 		ScrapeSite();
 
 		stopWatch.Stop();
-		Console.WriteLine($"Scraped {ScrapablePages.Count} pages in {stopWatch.Elapsed.TotalSeconds} seconds.");
+		var elapsedTime = stopWatch.Elapsed;
+		Console.WriteLine();
+		PrintElapsedTime(elapsedTime);
 	}
 
 	private void ScrapeSite()
@@ -30,12 +35,10 @@ public class Scraper(string startingUrl, string targetFolder)
 		while (ScrapablePages.Any(p => !p.Value))
 		{
 			var scrapeTasks = ScrapablePages.Where(p => !p.Value).Take(48) //TODO: configurable batch size
-				.Select(p => ScrapePageAsync(p.Key)).ToList();
+				.Select(p => ScrapePageAsync(p.Key)).ToArray();
 
-			Task.WhenAll(scrapeTasks).Wait(); //TODO: add minimum wait time to avoid request spamming?
-
-			Console.SetCursorPosition(0, Console.CursorTop);
-			Console.Write($"Scraped {ScrapablePages.Count(p => p.Value)} of {ScrapablePages.Count} pages.");
+			Task.WaitAll(scrapeTasks);
+			UpdateProgress();
 		}
 	}
 
@@ -90,6 +93,8 @@ public class Scraper(string startingUrl, string targetFolder)
 					using var httpClient = new HttpClient();
 					var fileBytes = httpClient.GetByteArrayAsync(linkUri).Result;
 					File.WriteAllBytes(filePath, fileBytes);
+					DownloadableFiles[filePath] = true;
+					UpdateProgress();
 				}
 			}
 		}
@@ -108,6 +113,7 @@ public class Scraper(string startingUrl, string targetFolder)
 				if (uri.AbsoluteUri.StartsWith(StartingUrl))
 				{
 					ScrapablePages.TryAdd(uri.AbsoluteUri, false);
+					UpdateProgress();
 				}
 			}
 		}
@@ -122,5 +128,33 @@ public class Scraper(string startingUrl, string targetFolder)
 		links.AddRange(document.DocumentNode.SelectNodes("//link[@href][@rel='icon']")?.ToList() ?? []);
 		links.AddRange(document.DocumentNode.SelectNodes("//link[@href][@rel='shortcut icon']")?.ToList() ?? []);
 		return links;
+	}
+
+	private void UpdateProgress()
+	{
+		if (Monitor.TryEnter(progressUpdateLock))
+		{
+			try
+			{
+				Console.SetCursorPosition(0, Console.CursorTop);
+				Console.Write($"Scraped {ScrapablePages.Count(p => p.Value)} of {ScrapablePages.Count} pages. " +
+					$"Downloaded {DownloadableFiles.Count(p => p.Value)} of {DownloadableFiles.Count} files.");
+			}
+			finally
+			{
+				Monitor.Exit(progressUpdateLock);
+			}
+		}
+	}
+
+	private void PrintElapsedTime(TimeSpan elapsedTime)
+	{
+		string hoursText = elapsedTime.Hours > 0 ? $"{elapsedTime.Hours} hours " : string.Empty;
+		string minutesText = elapsedTime.Minutes > 0 ? $"{elapsedTime.Minutes} minutes" : string.Empty;
+		string secondsText = $"{elapsedTime.Seconds} seconds.";
+
+		string timeText = string.Join(" ", hoursText, minutesText, secondsText).Trim();
+
+		Console.WriteLine($"Scraped {ScrapablePages.Count} pages in {timeText}.");
 	}
 }

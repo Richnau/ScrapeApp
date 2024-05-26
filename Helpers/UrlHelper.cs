@@ -4,11 +4,7 @@ public class UrlHelper
 {
 	public static string GetPath(string url)
 	{
-		if (!url.StartsWith("http://") && !url.StartsWith("https://"))
-		{
-			url = "https://" + url;
-		}
-		var uri = new Uri(url);
+		var uri = new Uri(EnsureProtocolPrefix(url));
 		var urlPath = uri.GetLeftPart(UriPartial.Path);
 		return urlPath;
 	}
@@ -26,5 +22,12 @@ public class UrlHelper
 			Console.WriteLine($"Error validating URL: {e.Message}");
 			return false;
 		}
+	}
+
+	private static string EnsureProtocolPrefix(string url)
+	{
+		return !url.StartsWith("http://") && !url.StartsWith("https://")
+			? "https://" + url
+			: url;
 	}
 }
