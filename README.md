@@ -6,9 +6,9 @@ A simple web scraper that scrapes the contents of a chosen site and copies it to
 
 ### Installing
 
-Compiled versions are available for Windows and MacOS under the 'Releases' section, both with and without dotnet bundled. Extract the entire contents into a target folder and run the executable. [ScrapeApp 1.1](https://github.com/Richnau/ScrapeApp/releases/tag/1.1)
+Compiled versions are available under the 'Releases' section, both with and without dotnet bundled. [ScrapeApp 1.1](https://github.com/Richnau/ScrapeApp/releases/tag/1.1)
 
-If you wish to compile it yourself, clone the repository to your local machine and run `dotnet run build` from a terminal when located in the projects root folder.
+If you wish to compile it yourself, clone the repository to your local machine and run `dotnet run build` from a terminal when located in the projects root folder. (Requires .NET 8)
 
 Further usage instructions are supplied by the console application.
 
@@ -19,7 +19,7 @@ Further usage instructions are supplied by the console application.
 
 ## Version History
 * 1.1
-    * Added compiled downloads for Windows & MacOS (both with and without .NET bundled)
+    * Added & updated compiled downloads (with and without .NET bundled)
 * 1.0
     * Initial Release
 
